@@ -1,0 +1,8 @@
+*.ini
+*.bak
+pic/
+*.sh
+*.bin
+*.ics
+posts.csv
+missing.csv
