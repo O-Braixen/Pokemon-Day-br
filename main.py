@@ -166,9 +166,9 @@ def filecheckndown(number):
     else:
         print("File " + pather + " exists!")
 
-if DownloadAllPics and len(picdir) < 898:
+if DownloadAllPics and len(picdir) < 1008:
     print("Incomplete picture directory, downloading pictures from provided path!")
-    for number in range(1, 899):
+    for number in range(1, 1009):
         numerer = str(number)
         if zfiller:
             numerer = numerer.zfill(3)
@@ -472,7 +472,7 @@ def pokepost():
                 pokemonname.insert(i,name[0])
                 i=i+1
             elif index == len(tablertime)-2: #2nd to last entry
-                postresponse = postresponse + "dia do " + name[0] + "! e também"
+                postresponse = postresponse + "dia do " + name[0] + "! e também "
                 pokemonname.insert(i,name[0])
                 i=i+1
             else:
@@ -616,10 +616,13 @@ def pokepost():
 
             #Now begins the fun part, asynchronous functions! I barely knew what to do here, but the code works, and that's what matters.
             class MyClient(discord.Client):
+                def __init__(self):
+                    super().__init__(intents=discord.Intents.default())
                 async def on_ready(self):
-                    print('Logged in as')
+                    print('bot fez login')
                     print('"' + self.user.name + '", id:', self.user.id)
-                    channelid = 0
+                    #channelid = 888567677784829982 #ID CANAL BH
+                    channelid = 1140647240927543496 #ID CANAL TESTE
                     i = 0
                     for guild in self.guilds:
                         for channel in guild.channels:
@@ -637,25 +640,51 @@ def pokepost():
                     try:
                         if not TestMode:
                             sendfiles = []
+                            embed_fields = []  # Lista para acumular os campos do Embed
+                            pokemon_names = []  # Lista para acumular os nomes dos Pokémon
                             print("Getting files to append")
+                            
                             for filez in discordfilenames:
-                                imagemembed = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'+pokemonid[i]+'.png'
+                                imagemembed = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemonid[i] + '.png'
                                 sender = discord.File(filez)
                                 print("appending: " + filez)
                                 sendfiles.append(sender)
+                                
                                 resposta = discord.Embed(
                                     colour=discord.Color.yellow(),
-                                    title="Dia do "+ pokemonname[i]+"!",
-                                    #description=postresponse
+                                    title="Dia do " + pokemonname[i] + "!",
+                                    # description=postresponse
                                 )
-                                resposta.set_image(url=imagemembed)
-                                resposta.add_field(name="<:pokeball:1048529728484692018>  Pokémon",value=pokemonname[i], inline=True)
-                                resposta.add_field(name="<:pokedex:1048529795547414548> Dex Nacional ",value="ID: "+pokemonid[i], inline=True)
-                                resposta.add_field(name="📅 Data ",value=datenatural, inline=True)
-                                resposta.add_field(name="⛩️ Nome Japones ",value=pokejapa[i], inline=True)
-                                resposta.set_footer(text="Postando com base no horário de Tokyo, Recurso em beta")
-                                await channel.send(embed=resposta)
-                                i=i+1
+                                resposta.set_thumbnail(url=imagemembed)
+                                resposta.add_field(name="<:pokeball:1048529728484692018>  Pokémon", value=pokemonname[i], inline=True)
+                                resposta.add_field(name="<:pokedex:1048529795547414548> Dex Nacional ", value="ID: " + pokemonid[i], inline=True)
+                                resposta.add_field(name="📅 Data ", value=datenatural, inline=True)
+                                #resposta.add_field(name="⛩️ Nome Japones ", value=pokejapa[i], inline=True)
+                                #resposta.set_footer(text="Sistema em beta")
+                                
+                                embed_fields.append(resposta)  # Acumula os campos do Embed
+                                pokemon_names.append(pokemonname[i])  # Acumula os nomes dos Pokémon
+                                
+                                i += 1
+                            if pokemon_names:  # Verifica se há campos do Embed acumulados
+                                
+                                if len(pokemon_names) == 1:
+                                    final_embed = embed_fields[0]
+                                    message_content = f"Bom dia <@&1079858130072109086> hoje é dia do Pokémon: {pokemon_names[0]}"
+                                    channel_message = await channel.send(content=message_content, embed=final_embed)
+                                elif len(pokemon_names) <= 4:
+                                    final_embed = embed_fields
+                                    pokemon_names_text = ', '.join(pokemon_names)  # Transforma a lista de nomes em uma string
+                                    message_content = f"Bom dia <@&1079858130072109086> hoje é dia dos Pokémon: {pokemon_names_text}"
+                                    channel_message = await channel.send(content=message_content, embeds=final_embed)
+                                else:
+                                    pokemon_names_text = ', '.join(pokemon_names)  # Transforma a lista de nomes em uma string
+                                    message_content = f"Bom dia <@&1079858130072109086> hoje é dia dos Pokémon: {pokemon_names_text}"
+                                    channel_message = await channel.send(content=message_content)
+                                    
+                            #await channel.send(content=message_content, embed=final_embed)
+                            print("mensagem enviada no discord")    
+
                             await client.close()
                         else:
                             for filez in discordfilenames:
@@ -663,6 +692,7 @@ def pokepost():
                             await client.close()
                     except:
                         await client.close()
+
 
             #loop = asyncio.get_event_loop()
             client = MyClient()
